@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>识迹、衡文、知学 | ReasonantAlive&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="我们很高兴开源 writing_modify，这是我们开源的第 12 个项目。选择题有标准答案，对就是对，错就是错：一位老师一小时能批完 200 份选择题，却往往批不完 20 份作文。原因在于作文是主观的。主观意味着评分会受老师的评分风格、当天的心情，甚至疲劳程度影响：同一位老师上午和深夜的尺度可能不一样，不同老师之间差异更大。批得慢，结果也不一定好。我们的解决方法：用 few-shot 让模型学">
+<meta property="og:type" content="article">
+<meta property="og:title" content="识迹、衡文、知学">
+<meta property="og:url" content="http://resonantalive.github.io/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/index.html">
+<meta property="og:site_name" content="ReasonantAlive&#39;s Blog">
+<meta property="og:description" content="我们很高兴开源 writing_modify，这是我们开源的第 12 个项目。选择题有标准答案，对就是对，错就是错：一位老师一小时能批完 200 份选择题，却往往批不完 20 份作文。原因在于作文是主观的。主观意味着评分会受老师的评分风格、当天的心情，甚至疲劳程度影响：同一位老师上午和深夜的尺度可能不一样，不同老师之间差异更大。批得慢，结果也不一定好。我们的解决方法：用 few-shot 让模型学">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-11-14T12:47:31.000Z">
+<meta property="article:modified_time" content="2026-11-14T12:49:16.972Z">
+<meta property="article:author" content="Jzx">
+<meta property="article:tag" content="project开源">
+<meta property="article:tag" content="工作流">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="ReasonantAlive's Blog" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ReasonantAlive&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://ResonantAlive.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-识迹、衡文、知学" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/" class="article-date">
+  <time class="dt-published" datetime="2026-11-14T12:47:31.000Z" itemprop="datePublished">2026-11-14</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      识迹、衡文、知学
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>我们很高兴开源 writing_modify，这是我们开源的第 12 个项目。<br>选择题有标准答案，对就是对，错就是错：一位老师一小时能批完 200 份选择题，却往往批不完 20 份作文。<br>原因在于作文是主观的。主观意味着评分会受老师的评分风格、当天的心情，甚至疲劳程度影响：同一位老师上午和深夜的尺度可能不一样，不同老师之间差异更大。批得慢，结果也不一定好。<br>我们的解决方法：用 few-shot 让模型学会”你的”尺度<br>我们没有去训练或微调模型，而是采用 few-shot（少样本学习）：<br>老师先认真批改 5～10 份作文：打分，也可以写意见条目；<br>系统把这些复核过的作文作为示范放进提示词（默认每次最多 3 份，可配置）；<br>大模型按同样的尺度批改其余作文；<br>老师只需复核：一键采纳 AI 的结果，或者改分、补充意见。改过的结果会成为之后批改的新示范。<br>整个过程低成本、无需训练，换一批题目、换一位老师马上就能用。示范默认只取自你自己的批改，不会混入别人的数据。在示范和大模型本身能力的加持下，批改结果更稳定、更一致，老师可以把时间花在真正需要判断的作文上，而不是逐份从头批。<br>一条完整的流水线<br>上传作文照片 → 分成一篇篇作文 → 识别手写 → 大模型批改 → 老师复核 → 批次汇总与共性问题报告 → 通过 API 接入你的系统<br>功能一览<br>两条识别路线：本地 OCR（PP-OCRv6，手写识别在你自己的机器上，只把文字发给大模型，不发照片），或者让视觉模型直接看图。<br>答题纸模板：先上传同款空白答题纸，系统记住纸上的印刷内容（标题、页边提示、条形码、页码），识别作文时自动去掉，不会混进作文里。<br>保留学生的拼写错误：识别不会替学生”改对”，这对批改语言分很重要。<br>批量处理，可暂停、可恢复：失败比例过高或接口连续出错时自动暂停，不会把整批作文白白烧掉。<br>教师复核：一键采纳、改分、写意见条目；每次修改都新增一版历史，旧版本和 AI 的原始结果不会被覆盖。<br>批次汇总和共性问题报告：见下面的 QA。<br>数据留在自己手里：批改数据都是磁盘上的普通文件（JSON 加原图），API key 只保存在服务器上；账号之间严格隔离，别人的数据一律访问不到；默认只监听本机。<br>QA</p>
+<ol>
+<li>看不到学生的闪光点和整体共性错误怎么办？<br>我们在设计时考虑到了这点，并把它加进了 v1：<br>每篇作文的批改结果里有判据和评语。想要单篇的闪光点，可以在提示词模板里要求模型写出来。<br>批次完成后，可以一键生成”共性问题报告”：汇总全班集中出现的问题（几篇出现、典型表现、涉及哪几篇）、给老师的讲评建议，以及整体优点。<br>生成报告只发送题目、评分标准和各篇的评价文字，不发送作文原文和照片。</li>
+<li>我已经有了相关工作台，或者其他 AI 写的软件了，怎么把 writing_modify 的批改数据接入进去？<br>我们采用”万物 API”的设计：writing_modify 自己的前端用的就是同一套 REST API（&#x2F;api&#x2F;v1）。每个账号都可以签发自己的 API 令牌（Bearer），令牌的权限不会超过账号本身。用它就能上传作文、创建批次、读取批改结果、提交复核。<br>批改数据也是磁盘上带版本号的 JSON 文件（复核记录、批次汇总、共性报告），可以直接读取。所以你只需要改动现有工作台的一小部分代码，就能把 writing_modify 合并进你的工作流。</li>
+<li>我的数据会被发到哪里？<br>本地 OCR 路线只会把识别出的文字发给你选择的大模型服务商，不发照片；视觉路线会发送照片。服务商是你自己配置的。如果它不是本机地址，第一次使用前系统会要求你明确确认。本软件不会自动向我们上传任何数据。</li>
+<li>批改得准吗？<br>结果取决于你选的模型和你给的示范质量。每篇作文会同时记录 AI 分和老师最终分，批次汇总里有两者的平均差，你可以用自己的数据来检验，再决定放手到什么程度。<br>下一步：训练本地小模型（完全自愿，欢迎贡献）<br>用大模型批改作文效果好，但成本高，作文内容还要发给第三方服务商。我们想训练一个能在本地运行的小模型来解决这两个问题，并以 Apache-2.0 开源协议将模型发布到 Hugging Face 和 ModelScope。<br>这也是 writing_modify 完整保存批改历史的原因。软件本身不会自动上传任何数据，是否贡献完全由你决定。<br>如果你愿意贡献数据，请先确认：<br>你有权提供这些作文：学生本人或监护人、学校已经同意（未成年人的作文尤其需要）；<br>已去掉姓名、学号、学校等个人信息；我们只需要作文文字，不需要照片；<br>我们主要使用作文文字和老师的最终分、意见；是否使用 AI 的输出，我们会根据对应模型厂家的条款来决定；<br>原始数据不会公开；数据保留多久、如何删除等具体问题，欢迎通过邮件联系我们商量。<br>请先发邮件到 <a href="mailto:&#x6a;&#x69;&#x7a;&#104;&#101;&#120;&#105;&#54;&#x36;&#x40;&#x67;&#x6d;&#97;&#x69;&#x6c;&#46;&#x63;&#x6f;&#x6d;">jizhexi66@gmail.com</a> 联系我们，再约定传输方式（不建议直接用邮件附件发送学生数据）。谢谢！<br>现状与局限（v1）<br>目前面向英语作文。<br>需要自备大模型服务（兼容 OpenAI 接口格式的服务商即可）。<br>v1 不提供删除功能；需要删数据时，先停止服务，再手动删除对应目录。<br>本地识别需要 Python 环境和 OpenVINO；第一次使用要把模型导出一次（约 30–45 秒），导出需要 torch 和 transformers。PP-OCRv6 的模型权重（来自 PaddleOCR，Apache-2.0）已随仓库提供，克隆后无需另外下载。<br>我们还没有公开的准确度基准评测。<br>开始使用<br>仓库：<a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify%EF%BC%88Apache-2.0%EF%BC%89">https://github.com/ResonantAlive/En-writing-modify（Apache-2.0）</a><br>需要 Python 3.12：<br>git clone <a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify.git">https://github.com/ResonantAlive/En-writing-modify.git</a><br>cd En-writing-modify<br>python -m venv .venv</li>
+</ol>
+<h1 id="激活虚拟环境：Windows-用-venv-Scripts-activate，macOS-Linux-用-source-venv-bin-activate"><a href="#激活虚拟环境：Windows-用-venv-Scripts-activate，macOS-Linux-用-source-venv-bin-activate" class="headerlink" title="激活虚拟环境：Windows 用 .venv\Scripts\activate，macOS &#x2F; Linux 用 source .venv&#x2F;bin&#x2F;activate"></a>激活虚拟环境：Windows 用 .venv\Scripts\activate，macOS &#x2F; Linux 用 source .venv&#x2F;bin&#x2F;activate</h1><p>pip install -r requirements.txt<br>python start.py</p>
+<p>注：没有git可以自己去Github下载压缩包，解压放在你选择的目录即可（然后跳过git命令，继续执行下面的）&#x2F; .venv环境是可选的，如果你不愿意使用虚拟环境，您可尝试直接pip<br>start.py 不会自己切换 Python，请先激活装好依赖的虚拟环境再运行。macOS &#x2F; Linux 如果没有 python 命令，请用 python3。<br>只用视觉模型路线，做完上面几步就够了。要用本地识别路线，还需要再装 torch 和 transformers（pip install torch transformers），用来把 PP-OCRv6 导出成 OpenVINO 模型。导出只做一次，生成的 data&#x2F;ov_models&#x2F; 可以直接拷到别的机器。权重已经包含在仓库里（约 157 MB，所以第一次克隆会稍慢），不需要另外下载。<br>更详细的说明见仓库里的 README。<br>我们希望得到你的建议，欢迎提 Issue 和 PR。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://resonantalive.github.io/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/" data-id="cuid-yDZMkooQFGFVD9dz4LLD" data-title="识迹、衡文、知学" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag">工作流</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2026/10/02/DeepSeek-Harness-Distiller-V1-0/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">后一篇</strong>
+      <div class="article-nav-title">DeepSeek-Harness-Distiller-V1.0</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag">工作流</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/project%E5%BC%80%E6%BA%90/" style="font-size: 10px;">project开源</a> <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" style="font-size: 10px;">工作流</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/11/">十一月 2026</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/">识迹、衡文、知学</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/DeepSeek-Harness-Distiller-V1-0/">DeepSeek-Harness-Distiller-V1.0</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/test/">test</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2026 Jzx<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
