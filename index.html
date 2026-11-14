@@ -98,7 +98,7 @@
 <li>看不到学生的闪光点和整体共性错误怎么办？<br>我们在设计时考虑到了这点，并把它加进了 v1：<br>每篇作文的批改结果里有判据和评语。想要单篇的闪光点，可以在提示词模板里要求模型写出来。<br>批次完成后，可以一键生成”共性问题报告”：汇总全班集中出现的问题（几篇出现、典型表现、涉及哪几篇）、给老师的讲评建议，以及整体优点。<br>生成报告只发送题目、评分标准和各篇的评价文字，不发送作文原文和照片。</li>
 <li>我已经有了相关工作台，或者其他 AI 写的软件了，怎么把 writing_modify 的批改数据接入进去？<br>我们采用”万物 API”的设计：writing_modify 自己的前端用的就是同一套 REST API（&#x2F;api&#x2F;v1）。每个账号都可以签发自己的 API 令牌（Bearer），令牌的权限不会超过账号本身。用它就能上传作文、创建批次、读取批改结果、提交复核。<br>批改数据也是磁盘上带版本号的 JSON 文件（复核记录、批次汇总、共性报告），可以直接读取。所以你只需要改动现有工作台的一小部分代码，就能把 writing_modify 合并进你的工作流。</li>
 <li>我的数据会被发到哪里？<br>本地 OCR 路线只会把识别出的文字发给你选择的大模型服务商，不发照片；视觉路线会发送照片。服务商是你自己配置的。如果它不是本机地址，第一次使用前系统会要求你明确确认。本软件不会自动向我们上传任何数据。</li>
-<li>批改得准吗？<br>结果取决于你选的模型和你给的示范质量。每篇作文会同时记录 AI 分和老师最终分，批次汇总里有两者的平均差，你可以用自己的数据来检验，再决定放手到什么程度。<br>下一步：训练本地小模型（完全自愿，欢迎贡献）<br>用大模型批改作文效果好，但成本高，作文内容还要发给第三方服务商。我们想训练一个能在本地运行的小模型来解决这两个问题，并以 Apache-2.0 开源协议将模型发布到 Hugging Face 和 ModelScope。<br>这也是 writing_modify 完整保存批改历史的原因。软件本身不会自动上传任何数据，是否贡献完全由你决定。<br>如果你愿意贡献数据，请先确认：<br>你有权提供这些作文：学生本人或监护人、学校已经同意（未成年人的作文尤其需要）；<br>已去掉姓名、学号、学校等个人信息；我们只需要作文文字，不需要照片；<br>我们主要使用作文文字和老师的最终分、意见；是否使用 AI 的输出，我们会根据对应模型厂家的条款来决定；<br>原始数据不会公开；数据保留多久、如何删除等具体问题，欢迎通过邮件联系我们商量。<br>请先发邮件到 <a href="mailto:&#x6a;&#x69;&#x7a;&#104;&#101;&#120;&#105;&#54;&#x36;&#x40;&#x67;&#x6d;&#97;&#x69;&#x6c;&#46;&#x63;&#x6f;&#x6d;">jizhexi66@gmail.com</a> 联系我们，再约定传输方式（不建议直接用邮件附件发送学生数据）。谢谢！<br>现状与局限（v1）<br>目前面向英语作文。<br>需要自备大模型服务（兼容 OpenAI 接口格式的服务商即可）。<br>v1 不提供删除功能；需要删数据时，先停止服务，再手动删除对应目录。<br>本地识别需要 Python 环境和 OpenVINO；第一次使用要把模型导出一次（约 30–45 秒），导出需要 torch 和 transformers。PP-OCRv6 的模型权重（来自 PaddleOCR，Apache-2.0）已随仓库提供，克隆后无需另外下载。<br>我们还没有公开的准确度基准评测。<br>开始使用<br>仓库：<a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify%EF%BC%88Apache-2.0%EF%BC%89">https://github.com/ResonantAlive/En-writing-modify（Apache-2.0）</a><br>需要 Python 3.12：<br>git clone <a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify.git">https://github.com/ResonantAlive/En-writing-modify.git</a><br>cd En-writing-modify<br>python -m venv .venv</li>
+<li>批改得准吗？<br>结果取决于你选的模型和你给的示范质量。每篇作文会同时记录 AI 分和老师最终分，批次汇总里有两者的平均差，你可以用自己的数据来检验，再决定放手到什么程度。<br>下一步：训练本地小模型（完全自愿，欢迎贡献）<br>用大模型批改作文效果好，但成本高，作文内容还要发给第三方服务商。我们想训练一个能在本地运行的小模型来解决这两个问题，并以 Apache-2.0 开源协议将模型发布到 Hugging Face 和 ModelScope。<br>这也是 writing_modify 完整保存批改历史的原因。软件本身不会自动上传任何数据，是否贡献完全由你决定。<br>如果你愿意贡献数据，请先确认：<br>你有权提供这些作文：学生本人或监护人、学校已经同意（未成年人的作文尤其需要）；<br>已去掉姓名、学号、学校等个人信息；我们只需要作文文字，不需要照片；<br>我们主要使用作文文字和老师的最终分、意见；是否使用 AI 的输出，我们会根据对应模型厂家的条款来决定；<br>原始数据不会公开；数据保留多久、如何删除等具体问题，欢迎通过邮件联系我们商量。<br>请先发邮件到 <a href="mailto:&#106;&#x69;&#122;&#x68;&#101;&#120;&#105;&#x36;&#54;&#x40;&#x67;&#x6d;&#x61;&#x69;&#108;&#x2e;&#99;&#111;&#x6d;">jizhexi66@gmail.com</a> 联系我们，再约定传输方式（不建议直接用邮件附件发送学生数据）。谢谢！<br>现状与局限（v1）<br>目前面向英语作文。<br>需要自备大模型服务（兼容 OpenAI 接口格式的服务商即可）。<br>v1 不提供删除功能；需要删数据时，先停止服务，再手动删除对应目录。<br>本地识别需要 Python 环境和 OpenVINO；第一次使用要把模型导出一次（约 30–45 秒），导出需要 torch 和 transformers。PP-OCRv6 的模型权重（来自 PaddleOCR，Apache-2.0）已随仓库提供，克隆后无需另外下载。<br>我们还没有公开的准确度基准评测。<br>开始使用<br>仓库：<a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify%EF%BC%88Apache-2.0%EF%BC%89">https://github.com/ResonantAlive/En-writing-modify（Apache-2.0）</a><br>需要 Python 3.12：<br>git clone <a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/En-writing-modify.git">https://github.com/ResonantAlive/En-writing-modify.git</a><br>cd En-writing-modify<br>python -m venv .venv</li>
 </ol>
 <h1 id="激活虚拟环境：Windows-用-venv-Scripts-activate，macOS-Linux-用-source-venv-bin-activate"><a href="#激活虚拟环境：Windows-用-venv-Scripts-activate，macOS-Linux-用-source-venv-bin-activate" class="headerlink" title="激活虚拟环境：Windows 用 .venv\Scripts\activate，macOS &#x2F; Linux 用 source .venv&#x2F;bin&#x2F;activate"></a>激活虚拟环境：Windows 用 .venv\Scripts\activate，macOS &#x2F; Linux 用 source .venv&#x2F;bin&#x2F;activate</h1><p>pip install -r requirements.txt<br>python start.py</p>
 <p>注：没有git可以自己去Github下载压缩包，解压放在你选择的目录即可（然后跳过git命令，继续执行下面的）&#x2F; .venv环境是可选的，如果你不愿意使用虚拟环境，您可尝试直接pip<br>start.py 不会自己切换 Python，请先激活装好依赖的虚拟环境再运行。macOS &#x2F; Linux 如果没有 python 命令，请用 python3。<br>只用视觉模型路线，做完上面几步就够了。要用本地识别路线，还需要再装 torch 和 transformers（pip install torch transformers），用来把 PP-OCRv6 导出成 OpenVINO 模型。导出只做一次，生成的 data&#x2F;ov_models&#x2F; 可以直接拷到别的机器。权重已经包含在仓库里（约 157 MB，所以第一次克隆会稍慢），不需要另外下载。<br>更详细的说明见仓库里的 README。<br>我们希望得到你的建议，欢迎提 Issue 和 PR。</p>
@@ -106,7 +106,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://resonantalive.github.io/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/" data-id="cuid-yDZMkooQFGFVD9dz4LLD" data-title="识迹、衡文、知学" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://resonantalive.github.io/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/" data-id="cuid9YNuJ3-siyBx3xLOuzlra" data-title="识迹、衡文、知学" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -284,7 +284,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://resonantalive.github.io/2026/10/02/DeepSeek-Harness-Distiller-V1-0/" data-id="cuidkBWPdz9fc6bOUxPRGYbDr" data-title="DeepSeek-Harness-Distiller-V1.0" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://resonantalive.github.io/2026/10/02/DeepSeek-Harness-Distiller-V1-0/" data-id="cuidj04p2i9alSuONjkUM898T" data-title="DeepSeek-Harness-Distiller-V1.0" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
@@ -325,7 +325,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://resonantalive.github.io/2026/10/02/test/" data-id="cuidMqhqjUUk8YNhb9Pek4soV" data-title="test" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      <a data-url="http://resonantalive.github.io/2026/10/02/test/" data-id="cuidFT-Hga9iaFMXZ1gWQlt1O" data-title="test" class="article-share-link"><span class="fa fa-share">分享</span></a>
       
       
       
