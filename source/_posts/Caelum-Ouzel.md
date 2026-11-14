@@ -1,5 +1,5 @@
 ---
-title: Caelum Ouzel : 分星、积云、循轨
+title: "Caelum Ouzel : 分星、积云、循轨"
 date: 2026-10-01 22:30:00
 tags: [project开源,模型训练]
 ---
