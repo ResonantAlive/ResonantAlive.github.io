@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Caelum Ouzel : 分星、积云、循轨 | ReasonantAlive&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="我们很高兴开源 Caelum Ouzel（苍穹乌鸫） 的训练代码。这是一个紧凑型 decoder-only MoE（混合专家）语言模型：总参数约 17 亿，每个 token 只激活约 3.5 亿。 你也可以：总成本 200～300 元，从零训练一个属于自己的家庭小模型。实际花费取决于训练时的 MFU、GPU 型号和租卡单价。 仓库：https:&#x2F;&#x2F;github.com&#x2F;ResonantAlive&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Caelum Ouzel : 分星、积云、循轨">
+<meta property="og:url" content="http://resonantalive.github.io/2026/10/01/Caelum-Ouzel/index.html">
+<meta property="og:site_name" content="ReasonantAlive&#39;s Blog">
+<meta property="og:description" content="我们很高兴开源 Caelum Ouzel（苍穹乌鸫） 的训练代码。这是一个紧凑型 decoder-only MoE（混合专家）语言模型：总参数约 17 亿，每个 token 只激活约 3.5 亿。 你也可以：总成本 200～300 元，从零训练一个属于自己的家庭小模型。实际花费取决于训练时的 MFU、GPU 型号和租卡单价。 仓库：https:&#x2F;&#x2F;github.com&#x2F;ResonantAlive&#x2F;">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-01T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-14T13:24:55.079Z">
+<meta property="article:author" content="Jzx">
+<meta property="article:tag" content="project开源">
+<meta property="article:tag" content="模型训练">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="ReasonantAlive's Blog" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ReasonantAlive&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://ResonantAlive.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Caelum-Ouzel" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/10/01/Caelum-Ouzel/" class="article-date">
+  <time class="dt-published" datetime="2026-10-01T13:30:00.000Z" itemprop="datePublished">2026-10-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Caelum Ouzel : 分星、积云、循轨
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>我们很高兴开源 <strong>Caelum Ouzel（苍穹乌鸫）</strong> 的训练代码。这是一个紧凑型 decoder-only MoE（混合专家）语言模型：总参数约 17 亿，每个 token 只激活约 3.5 亿。</p>
+<p>你也可以：总成本 200～300 元，从零训练一个属于自己的家庭小模型。实际花费取决于训练时的 MFU、GPU 型号和租卡单价。</p>
+<p>仓库：<a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/Cealum-Ouzel">https://github.com/ResonantAlive/Cealum-Ouzel</a> （Apache-2.0）</p>
+<h2 id="两三百块，真的够吗？"><a href="#两三百块，真的够吗？" class="headerlink" title="两三百块，真的够吗？"></a>两三百块，真的够吗？</h2><p>我们算一笔账。</p>
+<p>README 里预训练的默认预算是 <strong>20 亿（2B）token</strong>。在 RTX PRO 6000 上，FP8 路径实测吞吐约 <strong>4.57 万 tok&#x2F;s</strong>（原生 BF16 约 4.27 万）。2B ÷ 45.7k ≈ 43,800 秒，也就是 <strong>12 小时出头</strong>；再加上编译、验证和存 checkpoint 的开销，乘以你租卡的小时单价，就是总成本的大头。</p>
+<p>不想自己算？<code>train.py</code> 可以直接按预算反推要训多少 token：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">python train.py \</span><br><span class="line">  --manifest dataset/pretrain_manifest.yaml \</span><br><span class="line">  --out-dir All-checkpoints/caelum-ouzel-pretrain \</span><br><span class="line">  --budget-cny 250 \</span><br><span class="line">  --price-per-hour &lt;租卡单价&gt; \</span><br><span class="line">  --measured-tokens-per-second &lt;实测端到端吞吐&gt; \</span><br><span class="line">  --reserve-cny 20</span><br></pre></td></tr></table></figure>
+
+<p>公式很朴素：（预算 − 预留）÷ 单价 × 3600 × 实测吞吐 × 0.95（安全系数）。</p>
+<p>有两点需要注意：</p>
+<ul>
+<li>这三个参数必须一起给。</li>
+<li>吞吐请填<strong>端到端</strong>实测值（包含验证、存档、编译和数据等待），不要填纯计算的 tok&#x2F;s。否则算出来的 token 数偏多，钱花完了，训练还没跑完。不放心的话，可以再加一个 <code>--max-wall-hours</code> 兜底。</li>
+</ul>
+<h2 id="模型卡"><a href="#模型卡" class="headerlink" title="模型卡"></a>模型卡</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>架构</td>
+<td>Decoder-only 稀疏 MoE Transformer</td>
+</tr>
+<tr>
+<td>总参数 &#x2F; 激活参数</td>
+<td>~1.699B &#x2F; ~0.350B（每 token）</td>
+</tr>
+<tr>
+<td>层数 &#x2F; 隐藏维度</td>
+<td>28 &#x2F; 1024</td>
+</tr>
+<tr>
+<td>注意力</td>
+<td>GQA：8 个 query 头，4 个 KV 头，head_dim 128</td>
+</tr>
+<tr>
+<td>上下文窗口</td>
+<td>32,768 tokens</td>
+</tr>
+<tr>
+<td>分词器</td>
+<td>32,768 词表的 byte-level BPE</td>
+</tr>
+<tr>
+<td>MoE</td>
+<td>每层 8 个路由专家（top-1）+ 1 个共享专家</td>
+</tr>
+<tr>
+<td>路由 &#x2F; 共享专家维度</td>
+<td>2240 &#x2F; 416</td>
+</tr>
+<tr>
+<td>位置编码</td>
+<td>RoPE，theta &#x3D; 1,000,000</td>
+</tr>
+<tr>
+<td>归一化 &#x2F; 激活</td>
+<td>RMSNorm &#x2F; SwiGLU</td>
+</tr>
+<tr>
+<td>权重绑定</td>
+<td>输入嵌入与 LM head 绑定</td>
+</tr>
+</tbody></table>
+<p>完整的架构和训练默认参数以仓库里的 <code>model hyperparameters.yaml</code> 为准。</p>
+<h2 id="开源了什么？"><a href="#开源了什么？" class="headerlink" title="开源了什么？"></a>开源了什么？</h2><p><strong>开源：</strong></p>
+<ul>
+<li>预训练源码（含 CPT 持续预训练）</li>
+<li>SFT pipeline</li>
+<li>DPO 源码</li>
+<li>tokenizer 训练源码</li>
+<li>环境检查、benchmark 与测试</li>
+<li>数据集来源 &#x2F; 推荐数据集</li>
+</ul>
+<p><strong>不开源：</strong></p>
+<ul>
+<li>GRPO 源码、PPO 训练源码</li>
+<li>DPO 数据集、部分 SFT 数据集</li>
+<li>预训练 code 数据集</li>
+<li>模型权重与 checkpoint（训练进行中）</li>
+</ul>
+<p>按 README 走，大概率可以复现 base 模型。复现不出来先别急着怪代码：训练本身是概率过程，FP8 的精度本来就差，换张卡、换个驱动，曲线都可能有出入。（作者不保证复现结果）</p>
+<h2 id="设计要点"><a href="#设计要点" class="headerlink" title="设计要点"></a>设计要点</h2><p><strong>文档打包，但不串门。</strong> 预训练把多篇文档打包进同一条序列，减少 padding 浪费；同时用 FlashAttention 2 的 varlen 接口，保证注意力不会跨文档。</p>
+<p><strong>断点续训精确到 token。</strong> checkpoint 同时保存采样器状态和随机数状态。<code>--resume</code> 之后从上次的位置接着读，不重不漏。</p>
+<p><strong>不保存完整 logits。</strong> 用 Liger 的分块 linear cross-entropy 计算 32K 词表投影，不需要保存一整块 [tokens, vocab] 的 logits 张量。</p>
+<p><strong>FP8 可选，BF16 兜底。</strong> 默认走 NVIDIA Transformer Engine 的 FP8（DelayedScaling）；遇到不支持的环境，加 <code>--no-fp8 --no-te</code> 回退原生 BF16。</p>
+<p><strong>序列长度逐步拉长。</strong> 预训练按 512 → 1024 → 2048 分三段增加序列长度，32K 长上下文交给 CPT 阶段。</p>
+<p><strong>后训练也要省显存。</strong> SFT 只监督 assistant 片段；DPO 只预计算一次冻结参考模型的 log-prob，并按参考模型哈希缓存，不用全程再驻留一份 1.7B 的参考模型。</p>
+<p><strong>花钱之前先体检。</strong> <code>check_environment.py --strict --full-model</code> 会在付费训练前检查一遍 CUDA、FlashAttention 和 TE，并按正式模型形状跑数值与反向检查。</p>
+<p><strong>实时面板。</strong> 默认在 <a target="_blank" rel="noopener" href="http://127.0.0.1:6006/">http://127.0.0.1:6006</a> 异步绘制 Loss、Val Loss、PPL 与 Val PPL，不占用 CUDA stream。</p>
+<h2 id="推荐数据集"><a href="#推荐数据集" class="headerlink" title="推荐数据集"></a>推荐数据集</h2><table>
+<thead>
+<tr>
+<th>数据集</th>
+<th>许可证</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>CCI-3.0-HQ</td>
+<td>Apache-2.0</td>
+</tr>
+<tr>
+<td>FineWeb-Edu</td>
+<td>ODC-By</td>
+</tr>
+<tr>
+<td>chinese-cosmopedia</td>
+<td>Apache-2.0，另需遵守 OpenCSG 社区许可协议</td>
+</tr>
+<tr>
+<td>LongData-Corpus</td>
+<td>CC-BY-NC-4.0</td>
+</tr>
+</tbody></table>
+<p>最推荐的组合：<strong>FineWeb-Edu + chinese-cosmopedia + LongData-Corpus</strong>。</p>
+<p>两点提醒：</p>
+<ul>
+<li>chinese-cosmopedia 是大模型合成的教科书式数据，用多了，模型容易学到教师模型的口癖。</li>
+<li>LongData-Corpus 是非商用（NC）许可。用它训练出来的模型，商用或公开发布权重前，请自己确认许可证是否兼容。</li>
+</ul>
+<p>以上仅为推荐，如有侵权请联系我们或提交 PR。请确认训练数据都有适当授权，且不含私密、机密或非法收集的内容。</p>
+<h2 id="不建议的做法"><a href="#不建议的做法" class="headerlink" title="不建议的做法"></a>不建议的做法</h2><p><strong>1. 拿中文为主的 tokenizer 去处理英文。</strong> 分词器的压缩率受主训练语言影响很大。按我们的语料训练出来的 tokenizer，中文平均每个 token 能装下 1.5～2.5 个汉字；英文却可能要 3～5 个 token 才能拼出一个单词，模型处理英文的能力会大幅下降。如果你主要处理英文，建议用 <code>train_tokenizer.py</code> 重新训练一个适配英文的 tokenizer。</p>
+<p><strong>2. 买付费数据集。</strong> 模型太小了，付费数据集带来的提升很有限。</p>
+<p><strong>3. 直接复用大模型的 tokenizer。</strong> embedding 会吃掉大量参数：以 15 万词表、1024 隐藏维度为例，光 embedding 就约 1.5 亿参数，接近我们每个 token 激活参数（3.5 亿）的一半，而 32K 词表的 embedding 只有约 3,355 万。留给 Transformer block 的参数变少，模型能力下降。同时 logits 也跟着放大近 5 倍，显存吃紧只能把 micro batch 调小，tensor 喂不满，MFU 下降，训练变慢。</p>
+<p><strong>4. 做 logits &#x2F; 隐状态蒸馏。</strong> 需要和教师模型使用同一个 tokenizer、相同的超参数，门槛较高。</p>
+<p><strong>5. 接入 Agent 工具。</strong> 模型的工作记忆连 system prompt 都不一定能完整存下，极易出错，甚至造成实际损失。而且说实话，你觉得 1.7B 能有多少指令遵循能力？</p>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>需要 Python 3.12，并安装与机器 CUDA runtime 匹配的 PyTorch（我们的实测环境是 PyTorch 2.8.0+cu128）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/ResonantAlive/Cealum-Ouzel.git</span><br><span class="line"><span class="built_in">cd</span> Cealum-Ouzel</span><br><span class="line"></span><br><span class="line">python -m venv .venv</span><br><span class="line"><span class="built_in">source</span> .venv/bin/activate</span><br><span class="line">python -m pip install --upgrade pip</span><br><span class="line">python -m pip install -r requirements.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 正式 CUDA 训练：装 FlashAttention 2 和 Transformer Engine，然后先体检</span></span><br><span class="line">python -m pip install -r requirements-server.txt</span><br><span class="line">python check_environment.py --strict --full-model</span><br></pre></td></tr></table></figure>
+
+<p>花钱之前，先用一个迷你模型跑通整条链路（smoke run）。<code>smoke/corpus.jsonl</code> 自己准备一个小的 JSONL 即可，每行一个带 <code>text</code> 字段的对象：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">python train_tokenizer.py --input smoke/corpus.jsonl --output smoke/tokenizer.json \</span><br><span class="line">  --vocab-size 512 --allow-smaller-vocab</span><br><span class="line">python build_pretrain_ids.py --tokenizer smoke/tokenizer.json --input smoke/corpus.jsonl \</span><br><span class="line">  --output smoke/encoded --fresh --workers 2</span><br><span class="line">python train.py --smoke --no-fp8 --no-te</span><br></pre></td></tr></table></figure>
+
+<p>正式流程：训练 tokenizer → 逐个编码语料 → 写 manifest → 预训练 → CPT → SFT → DPO。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 训练分词器</span></span><br><span class="line">python train_tokenizer.py --input /path/to/tokenizer-corpus \</span><br><span class="line">  --output tokenizer/tokenizer.json --vocab-size 32768</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 逐个编码语料（corpus.json 里出现 complete: true 才算完成）</span></span><br><span class="line">python build_pretrain_ids.py --tokenizer tokenizer/tokenizer.json \</span><br><span class="line">  --input /path/to/raw-jsonl --output dataset/encoded/my-corpus \</span><br><span class="line">  --name my-corpus --workers 20</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 从模板创建本地 manifest</span></span><br><span class="line"><span class="built_in">cp</span> dataset/pretrain_manifest.example.yaml dataset/pretrain_manifest.yaml</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 预训练（balanced profile）</span></span><br><span class="line">python train.py --manifest dataset/pretrain_manifest.yaml \</span><br><span class="line">  --out-dir All-checkpoints/caelum-ouzel-pretrain \</span><br><span class="line">  --target-tokens 2000000000 --batch-profile balanced --compile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 中断了？从最近的 checkpoint 精确续训</span></span><br><span class="line">python train.py --resume All-checkpoints/caelum-ouzel-pretrain/last.pt \</span><br><span class="line">  --manifest dataset/pretrain_manifest.yaml \</span><br><span class="line">  --out-dir All-checkpoints/caelum-ouzel-pretrain</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 持续预训练（新阶段用 --init，只加载权重）</span></span><br><span class="line"><span class="built_in">cp</span> dataset/cpt_manifest.example.yaml dataset/cpt_manifest.yaml</span><br><span class="line">python trainCPT.py --init All-checkpoints/caelum-ouzel-pretrain/last.pt \</span><br><span class="line">  --manifest dataset/cpt_manifest.yaml \</span><br><span class="line">  --out-dir All-checkpoints/caelum-ouzel-cpt --compile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 6. SFT 与 DPO（做了 CPT 的话，SFT 的 --init 换成 CPT 的 checkpoint）</span></span><br><span class="line">python trainSFT.py --init All-checkpoints/caelum-ouzel-pretrain/last.pt \</span><br><span class="line">  --data /path/to/sft.jsonl --out-dir All-checkpoints/caelum-ouzel-sft</span><br><span class="line">python trainDPO.py --init All-checkpoints/caelum-ouzel-sft/last.pt \</span><br><span class="line">  --data /path/to/dpo.jsonl --out-dir All-checkpoints/caelum-ouzel-dpo</span><br></pre></td></tr></table></figure>
+
+<p>几个注意事项：</p>
+<ul>
+<li><code>--init</code> 和 <code>--resume</code> 别混用：新阶段用 <code>--init</code>，优化器、学习率进度、随机状态和语料游标全部重新开始；<code>--resume</code> 只用于同一阶段的精确续训。</li>
+<li>默认用 balanced profile。extreme profile（每步 40,960 × 3 tokens）只有在对应机器上完成长时间的 OOM、验证、checkpoint 和续训测试后再用。</li>
+<li>一个完整 checkpoint（模型 + AdamW 状态）约 19 GiB，请按磁盘空间设置 <code>--keep-last-checkpoints</code>。</li>
+<li>个人路径、原始数据、编码语料、checkpoint 和实验日志不要提交进仓库。</li>
+</ul>
+<p>更详细的说明见仓库里的 README。</p>
+<h2 id="现状与局限"><a href="#现状与局限" class="headerlink" title="现状与局限"></a>现状与局限</h2><ul>
+<li>目前只在 RTX PRO 6000（sm_120）+ PyTorch 2.8.0+cu128 + Transformer Engine 2.15 上完整验证过。FlashAttention 和 TE 与 ABI、GPU 架构强相关，换环境请先跑 <code>check_environment.py</code> 和 <code>benchmark_pro6000.py</code>。</li>
+<li>文中的吞吐与成本都基于我们的机器实测，换卡、换镜像都会变化。</li>
+<li>小模型能力有限：可能生成错误、有偏见或不当的内容，不适合用于高风险决策。</li>
+</ul>
+<h2 id="免责声明"><a href="#免责声明" class="headerlink" title="免责声明"></a>免责声明</h2><p>本项目源代码以 Apache-2.0 协议按”现状”（as is）提供，不对适用性、稳定性、无缺陷或满足特定用途作任何明示或暗示的保证。</p>
+<p>数据合规</p>
+<p>训练数据的授权由使用者自行确认。请遵守各数据集的许可证，确保数据不含私密、机密或非法收集的内容。</p>
+<p>成本与风险</p>
+<p>租用 GPU 会实际产生费用。请先完成 smoke run 和环境检查，再开始付费训练。因配置错误、OOM、中断等造成的费用损失，由使用者自行承担，作者不为开销打包票，不为任何开销负责。</p>
+<p>发布模型</p>
+<p>如果你要公开发布自己训练的权重，请同时公开数据来源、预期用途、评测结果和已知限制，并确认模型许可证与所有训练数据的许可证兼容。作者不为其负责。</p>
+<p>欢迎试用、提 Issue 和 PR。</p>
+<hr>
+<p><em>Caelum Ouzel 训练代码以 Apache-2.0 协议开源。</em></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://resonantalive.github.io/2026/10/01/Caelum-Ouzel/" data-id="cuidM-YgLt8AoPZY13p3DEiys" data-title="Caelum Ouzel : 分星、积云、循轨" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/" rel="tag">模型训练</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2026/10/02/test/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">前一篇</strong>
+      <div class="article-nav-title">
+        
+          test
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag">工作流</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/" rel="tag">模型训练</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/project%E5%BC%80%E6%BA%90/" style="font-size: 20px;">project开源</a> <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" style="font-size: 10px;">工作流</a> <a href="/tags/%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/" style="font-size: 10px;">模型训练</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/11/">十一月 2026</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/">识迹、衡文、知学</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/DeepSeek-Harness-Distiller-V1-0/">DeepSeek-Harness-Distiller-V1.0</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/test/">test</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/01/Caelum-Ouzel/">Caelum Ouzel : 分星、积云、循轨</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2026 Jzx<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
