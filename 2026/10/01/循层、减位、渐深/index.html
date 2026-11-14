@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>循层、减位、渐深 | ReasonantAlive&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="我们很高兴开源 RDT-Solmen-120M 的完整训练包。仓库其实五月底就已经放到 GitHub 上了，这篇算是补一个正式的介绍。 一句话概括：单卡、2B tokens、50 元以内，从原始 jsonl 一路训练到一个能对话的 120M 中文小模型。 一本书读一遍和读四遍，书还是那本书，读四遍的人通常理解得更深。循环深度 Transformer（Recurrent-Depth Transfor">
+<meta property="og:type" content="article">
+<meta property="og:title" content="循层、减位、渐深">
+<meta property="og:url" content="http://resonantalive.github.io/2026/10/01/%E5%BE%AA%E5%B1%82%E3%80%81%E5%87%8F%E4%BD%8D%E3%80%81%E6%B8%90%E6%B7%B1/index.html">
+<meta property="og:site_name" content="ReasonantAlive&#39;s Blog">
+<meta property="og:description" content="我们很高兴开源 RDT-Solmen-120M 的完整训练包。仓库其实五月底就已经放到 GitHub 上了，这篇算是补一个正式的介绍。 一句话概括：单卡、2B tokens、50 元以内，从原始 jsonl 一路训练到一个能对话的 120M 中文小模型。 一本书读一遍和读四遍，书还是那本书，读四遍的人通常理解得更深。循环深度 Transformer（Recurrent-Depth Transfor">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-10-01T13:30:00.000Z">
+<meta property="article:modified_time" content="2026-11-14T13:28:52.830Z">
+<meta property="article:author" content="Jzx">
+<meta property="article:tag" content="project开源">
+<meta property="article:tag" content="小模型">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="ReasonantAlive's Blog" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fork-awesome@1.2.0/css/fork-awesome.min.css">
+
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">ReasonantAlive&#39;s Blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS 订阅"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="搜索"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="搜索"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://ResonantAlive.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-循层、减位、渐深" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2026/10/01/%E5%BE%AA%E5%B1%82%E3%80%81%E5%87%8F%E4%BD%8D%E3%80%81%E6%B8%90%E6%B7%B1/" class="article-date">
+  <time class="dt-published" datetime="2026-10-01T13:30:00.000Z" itemprop="datePublished">2026-10-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      循层、减位、渐深
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>我们很高兴开源 <strong>RDT-Solmen-120M</strong> 的完整训练包。仓库其实五月底就已经放到 GitHub 上了，这篇算是补一个正式的介绍。</p>
+<p>一句话概括：单卡、2B tokens、50 元以内，从原始 jsonl 一路训练到一个能对话的 120M 中文小模型。</p>
+<p>一本书读一遍和读四遍，书还是那本书，读四遍的人通常理解得更深。循环深度 Transformer（Recurrent-Depth Transformer，下文简称 RDT）做的就是这件事：同一组层，让数据反复过几遍。参数量不变，模型”想”的时间变长了。</p>
+<p>整条流水线：</p>
+<p>原始 jsonl → 预分词 → 显存测试 → A&#x2F;B&#x2F;C&#x2F;D&#x2F;E 五阶段预训练 → SFT → 自我认知校准 → 对话</p>
+<h2 id="为什么？"><a href="#为什么？" class="headerlink" title="为什么？"></a>为什么？</h2><p>小模型的参数预算非常紧。以我们的配置为例，122.3M 参数里，embedding 一项就占了约 54.7M，接近一半。真正负责”思考”的 Transformer 层只有约 67.6M。</p>
+<p>想让模型更聪明，常规做法是加宽或者加深，但这两条路都要加参数，显存和 optimizer states 也跟着一起涨。</p>
+<p>我们没有去堆更多的层，而是把现有的 6 层循环使用：训练到最后，每个 token 要过 4 圈，相当于 24 层的计算深度，参数量还是 6 层的。</p>
+<p>当然，计算不是白来的。同样训练 2B tokens，RDT 的计算量大约是普通 Dense 的 1.93 倍。所以剩下的问题就是：多出来的这部分算力，怎么再省回来？</p>
+<p>我们的回答就是标题里的三件事：</p>
+<ul>
+<li><strong>循层</strong>：一组层跑多圈，用计算换参数。</li>
+<li><strong>减位</strong>：Linear 走 Transformer Engine 的真 FP8，算得更快。</li>
+<li><strong>渐深</strong>：seq_len 和 depth 从小到大交错生长，前期少花钱。</li>
+</ul>
+<h2 id="How-to-work？"><a href="#How-to-work？" class="headerlink" title="How to work？"></a>How to work？</h2><h3 id="循层：6-层真实参数，跑-4-圈"><a href="#循层：6-层真实参数，跑-4-圈" class="headerlink" title="循层：6 层真实参数，跑 4 圈"></a>循层：6 层真实参数，跑 4 圈</h3><p>前向的核心逻辑只有几行（简化版）：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">x = embed(input_ids)</span><br><span class="line">e = x                                          <span class="comment"># 原始输入，每一圈都会用到</span></span><br><span class="line">scale = <span class="number">1</span> / sqrt(recurrence_steps)             <span class="comment"># 残差按圈数缩放</span></span><br><span class="line"><span class="keyword">for</span> _ <span class="keyword">in</span> <span class="built_in">range</span>(recurrence_steps):              <span class="comment"># 训练时 2 -&gt; 3 -&gt; 4</span></span><br><span class="line">    x = sigmoid(decay) * x + tanh(gate) * e    <span class="comment"># 旧状态衰减 + 重新注入输入</span></span><br><span class="line">    <span class="keyword">for</span> block <span class="keyword">in</span> blocks:                       <span class="comment"># 只有 6 个真实 block</span></span><br><span class="line">        x = block(x, rope, scale)</span><br><span class="line">logits = lm_head(norm(x))                      <span class="comment"># 输出头与 embedding 共享权重</span></span><br></pre></td></tr></table></figure>
+
+<p>把同一组层反复跑，最怕的是越跑越飘：圈数一多，隐状态就容易漂移，训练跟着不稳。为此我们做了三处处理：</p>
+<p><strong>每一圈都重新注入输入。</strong> 进入新的一圈之前，旧状态先乘一个 <code>sigmoid</code> 衰减，再加上经过 <code>tanh</code> 门控的原始 embedding。两个系数都按维度可学习，而且都有界：初始时旧状态保留一半，输入门控约为 0.1。</p>
+<p><strong>残差按圈数缩放。</strong> 每个 block 的残差分支先乘 <code>1/sqrt(圈数)</code>，再乘一个可学习的门，门的取值被限制在 (0, 2) 之间，初始为 1。圈数变多时，单圈的更新幅度会自动变小。</p>
+<p><strong>RoPE cache 保持 FP32。</strong> 只在 forward 时把当前用到的 slice 转成计算精度，避免长上下文的相位精度被永久降级。</p>
+<p>其余结构都很常规：</p>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>参数量</td>
+<td>约 122.3M（embedding 约 54.7M）</td>
+</tr>
+<tr>
+<td>d_model</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>注意力</td>
+<td>GQA，16 个 Q head &#x2F; 4 个 KV head</td>
+</tr>
+<tr>
+<td>真实层数</td>
+<td>6</td>
+</tr>
+<tr>
+<td>FFN</td>
+<td>SwiGLU，hidden 2816</td>
+</tr>
+<tr>
+<td>归一化 &#x2F; 位置编码</td>
+<td>RMSNorm &#x2F; RoPE（base 500000）</td>
+</tr>
+<tr>
+<td>词表</td>
+<td>53376，tie embeddings</td>
+</tr>
+<tr>
+<td>上下文</td>
+<td>2048</td>
+</tr>
+<tr>
+<td>训练深度</td>
+<td>2 → 3 → 4</td>
+</tr>
+</tbody></table>
+<h3 id="减位：真-FP8，而不是模拟出来的-FP8"><a href="#减位：真-FP8，而不是模拟出来的-FP8" class="headerlink" title="减位：真 FP8，而不是模拟出来的 FP8"></a>减位：真 FP8，而不是模拟出来的 FP8</h3><p>打开 <code>--use_fp8_linears</code> 后，QKV&#x2F;O 投影和 Dense SwiGLU FFN 全部换成 NVIDIA Transformer Engine 的 FP8 Linear，recipe 是 HYBRID：forward 用 E4M3，backward 用 E5M2。</p>
+<p>不是所有东西都适合 FP8。RMSNorm、attention softmax、loss 和 optimizer states 都保留高精度，只让矩阵乘这种最吃算力、也最扛得住低精度的部分走 FP8。</p>
+<p>注意力优先走 FlashAttention2，没装的话退回 PyTorch SDPA。没装 Transformer Engine 时，脚本会自动关掉 FP8 Linear、退回 BF16，并打印警告：能跑，但会明确告诉你现在跑的不是 FP8。</p>
+<h3 id="渐深：seq-和-depth-交错生长"><a href="#渐深：seq-和-depth-交错生长" class="headerlink" title="渐深：seq 和 depth 交错生长"></a>渐深：seq 和 depth 交错生长</h3><p>训练前期，模型连基本的语言规律都还没学会，这时候就上长序列、深循环，很多算力是浪费的。所以我们把 2B tokens 拆成五个阶段：</p>
+<table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Token 进度</th>
+<th>seq_len</th>
+<th>depth</th>
+<th>每 token 训练计算量</th>
+<th>约 step 数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td>0%–35%</td>
+<td>512</td>
+<td>2</td>
+<td>1.22 GFLOPs</td>
+<td>2,670</td>
+</tr>
+<tr>
+<td>B</td>
+<td>35%–50%</td>
+<td>1024</td>
+<td>2</td>
+<td>1.29 GFLOPs</td>
+<td>1,144</td>
+</tr>
+<tr>
+<td>C</td>
+<td>50%–70%</td>
+<td>1024</td>
+<td>3</td>
+<td>1.77 GFLOPs</td>
+<td>1,526</td>
+</tr>
+<tr>
+<td>D</td>
+<td>70%–75%</td>
+<td>2048</td>
+<td>3</td>
+<td>2.00 GFLOPs</td>
+<td>381</td>
+</tr>
+<tr>
+<td>E</td>
+<td>75%–100%</td>
+<td>2048</td>
+<td>4</td>
+<td>2.56 GFLOPs</td>
+<td>1,907</td>
+</tr>
+</tbody></table>
+<p>depth 走的是 <code>2+1+1</code>，seq_len 从 512 长到 2048，两者交错增长，不在同一个边界同时增加。</p>
+<p>每个阶段单独启动一个进程，阶段内 shape 固定，方便 CUDA kernel 复用；下一阶段自动从最新 checkpoint 恢复。<code>run_2b_train.sh</code> 会顺序跑完 A 到 E，不需要手动切换。</p>
+<p>和全程 seq 2048、depth 4 相比，这套 schedule 把总计算量从约 5.11 EFLOPs 压到约 3.42 EFLOPs，省下大约三分之一。</p>
+<h2 id="MTP-去哪了？"><a href="#MTP-去哪了？" class="headerlink" title="MTP 去哪了？"></a>MTP 去哪了？</h2><p>仓库名里写着 MTP，但它默认是关的。</p>
+<p>独立的 MTP head 是一个 <code>d_model × vocab_size</code> 的输出头，会额外增加约 54.7M 参数，120M 的模型一下子就变成 177M。按当前 schedule 粗略估算，训练计算量还要再涨 18% 左右，optimizer states 也要多占一份显存。</p>
+<p>为了让总参数量留在 120M 附近，我们默认把它关掉了。代码路径保留着，传 <code>--mtp_weight &gt; 0</code> 就会启用。</p>
+<h2 id="算一笔账"><a href="#算一笔账" class="headerlink" title="算一笔账"></a>算一笔账</h2><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>训练 tokens</td>
+<td>2B</td>
+</tr>
+<tr>
+<td>每个 optimizer step</td>
+<td>262,144 tokens</td>
+</tr>
+<tr>
+<td>optimizer steps</td>
+<td>约 7,630</td>
+</tr>
+<tr>
+<td>总计算量</td>
+<td>约 3.42 EFLOPs</td>
+</tr>
+<tr>
+<td>相对普通 depth&#x3D;1 Dense</td>
+<td>约 1.93×</td>
+</tr>
+</tbody></table>
+<p>按脚本默认的 <code>--peak_tflops 419</code> 估算，MFU 在 20% 时大约需要 11.3 小时，25% 时大约 9.1 小时。租一张 RTX 5090，整套流程能控制在 50 元以内。</p>
+<p>实际时间以训练日志里的 <code>tok/s</code> 为准，日志会直接打印 ETA。训练开始后，也可以用 <code>python speed_estimate.py --tok_s &lt;实测值&gt;</code> 重新估一次。</p>
+<!-- TODO：在这里补上实测的 tok/s、总耗时和实际花费 -->
+
+
+<h2 id="不知道写什么标题"><a href="#不知道写什么标题" class="headerlink" title="不知道写什么标题"></a>不知道写什么标题</h2><p><strong>torch.compile 默认关闭。</strong> PyTorch 2.8 的 CUDA Graph 捕获会和 RDT 的循环复用冲突。想试编译可以用 <code>USE_COMPILE=1 COMPILE_MODE=default</code>，但不要打开 <code>COMPILE_CUDAGRAPHS=1</code>。</p>
+<p><strong>显存测试要算全。</strong> <code>memory_test.py</code> 会在目标 GPU 上测出 seq_len 为 512&#x2F;1024&#x2F;2048、depth 为 4 时的最大安全 micro batch。测量范围包括 activation、gradient、AdamW optimizer states 和 optimizer.step 的峰值，结果写进 <code>config.txt</code> 供训练脚本读取。每步 tokens 固定为 262,144，batch 越大，梯度累积的步数就越少。</p>
+<p><strong>gradient checkpointing 不主动开。</strong> 它会拖慢速度，只有显存测试 OOM 时才由脚本自动启用。</p>
+<p><strong>数据按块懒加载。</strong> 训练数据不会在启动时一次性读进内存，而是按 64MB 的块做 LRU 缓存。90GB 内存的服务器默认给 60GB 缓存，预分词和数据预取各用 15 个 worker。</p>
+<p><strong>尽量不让 GPU 等 CPU。</strong> 逐 micro-step 的 loss 同步检查默认关闭；排查 NaN 时再加 <code>--loss_finite_check_every 1</code>。</p>
+<p><strong>weight decay 只给矩阵。</strong> AdamW（优先 fused）只对矩阵权重做 weight decay，RMSNorm、门控、衰减这类一维参数不做。</p>
+<p><strong>中断也会存档。</strong> 默认每 1000 step 保存一次，只保留最近 3 个。按 Ctrl+C 或异常退出时，脚本会先尽量保存 checkpoint 再退出。checkpoint 是 Hugging Face 风格的目录，<code>latest.json</code> 指向最新一份。</p>
+<h2 id="QA"><a href="#QA" class="headerlink" title="QA"></a>QA</h2><ol>
+<li><strong>推理时 depth 能改吗？</strong><br>能。<code>Infer.py</code> 和 <code>InferSFT.py</code> 都有 <code>--depth</code> 参数，默认是 4，也就是训练最后阶段用的深度。depth 只决定”想几圈”，不改变参数量；每多一圈，每个 token 的计算量就多一份。你可以拿同一个 checkpoint 跑 1 到 4 圈，自己对比效果。</li>
+<li><strong>没有 RTX 5090，或者装不上 Transformer Engine，能跑吗？</strong><br>能。没有 Transformer Engine 会自动退回 BF16 Linear，没有 flash-attn 会退回 PyTorch SDPA，只是慢一些。H800 推荐 CUDA 12.8 + BF16&#x2F;FP8 路线。5090 是 Blackwell 架构（sm_120），PyTorch、flash-attn、Transformer Engine 的 wheel 都要支持 sm_120。环境往往是最容易卡住的一步，推荐直接用 NVIDIA 的 PyTorch NGC 容器。</li>
+<li><strong>为什么是 122.3M，不是 120M？</strong><br>embedding 占了大头。如果一定要压到 120.0M，可以继续调小 <code>ffn_hidden_size</code>，或者改词表和输出头策略。<code>estimate_params.py</code> 可以直接打印当前配置的参数量。</li>
+<li><strong>Windows 能用吗？</strong><br>训练请用 Linux，Transformer Engine 只在 Linux 下安装。训练好的 checkpoint 可以拷回 Windows，用 <code>InferSFT.py</code> 或 <code>ChatSFT.py</code> 在本机对话。</li>
+</ol>
+<h2 id="快速上手"><a href="#快速上手" class="headerlink" title="快速上手"></a>快速上手</h2><p>仓库：<a target="_blank" rel="noopener" href="https://github.com/ResonantAlive/Recurrent-Depth-Transformer-SLM-120M-Dense">https://github.com/ResonantAlive/Recurrent-Depth-Transformer-SLM-120M-Dense</a>（Apache-2.0）</p>
+<p>需要 Linux、一张 NVIDIA GPU 和 PyTorch 2.8 以上：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/ResonantAlive/Recurrent-Depth-Transformer-SLM-120M-Dense.git</span><br><span class="line"><span class="built_in">cd</span> Recurrent-Depth-Transformer-SLM-120M-Dense</span><br><span class="line">python3 -m venv .venv</span><br><span class="line"><span class="built_in">source</span> .venv/bin/activate</span><br><span class="line">python -m pip install -U pip</span><br><span class="line">pip install -r requirements.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># FlashAttention2 和 Transformer Engine（以 5090 / sm_120 为例）</span></span><br><span class="line">pip install ninja packaging psutil</span><br><span class="line">MAX_JOBS=4 pip install flash-attn --no-build-isolation</span><br><span class="line">MAX_JOBS=4 NVTE_BUILD_THREADS_PER_JOB=1 NVTE_CUDA_ARCHS=120 pip install --no-build-isolation <span class="string">&quot;transformer_engine[pytorch]&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 一键：预分词 → 显存测试 → A/B/C/D/E 五阶段预训练</span></span><br><span class="line"><span class="built_in">chmod</span> +x run_2b_train.sh</span><br><span class="line">RAW_DATA_DIR=/path/to/jsonl_dir ./run_2b_train.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># SFT：先生成自我认知数据，再从预训练 checkpoint 开始全参 SFT</span></span><br><span class="line">python MakeIdentityAnchor.py</span><br><span class="line"><span class="built_in">export</span> SFT_RAW_DIR=/path/to/sft.jsonl</span><br><span class="line"><span class="built_in">export</span> IDENTITY_SFT=dataset/rdt_solmen_identity_anchor.jsonl</span><br><span class="line"><span class="built_in">export</span> PRETRAIN_CKPT=runs/dense_rdt_120m/checkpoints/latest.json</span><br><span class="line">bash run_sft_18k.sh</span><br><span class="line"></span><br><span class="line"><span class="comment"># 和它聊两句</span></span><br><span class="line">python InferSFT.py --checkpoint runs/dense_rdt_120m_sft/checkpoints/latest.json --interactive --depth 4</span><br></pre></td></tr></table></figure>
+
+<p>注：预训练数据是 jsonl，每行至少要有一个 <code>text</code> 字段。预分词和显存测试做过一次后会自动跳过，想强制重跑用 <code>RUN_PRETOKENIZE=1 RUN_MEMORY_TEST=1 ./run_2b_train.sh</code>。SFT 中断后想继续，用 <code>RESUME_LATEST=1 bash run_sft_18k.sh</code>。</p>
+<p>更详细的逐步命令见仓库里的 <code>step.md</code>，每一步都可以直接复制。</p>
+<h2 id="已知限制"><a href="#已知限制" class="headerlink" title="已知限制"></a>已知限制</h2><ul>
+<li><strong>只支持单卡。</strong> 训练脚本目前没有 DDP &#x2F; FSDP。</li>
+<li><strong>torch.compile 默认关闭。</strong> 受 CUDA Graph 冲突影响，编译带来的那部分加速暂时拿不到。</li>
+<li><strong>参数量是 122.3M，不是严格的 120M。</strong></li>
+<li><strong>MTP 默认关闭。</strong> 开启后参数量和计算量都会明显上涨。</li>
+<li><strong>还没有公开的基准评测。</strong> 仓库里目前只有生成和对话测试脚本。</li>
+<li><strong>主要面向中文。</strong> 预训练默认数据是 CCI3-HQ，SFT 可以按比例混入英文数据。</li>
+</ul>
+<h2 id="参与"><a href="#参与" class="headerlink" title="参与"></a>参与</h2><p>如果你也只有一张卡、几十块钱的预算，又想从零训出一个完整的小模型，欢迎试试。</p>
+<p>我们希望得到你的建议，欢迎提 Issue 和 PR。</p>
+<h2 id="免责声明"><a href="#免责声明" class="headerlink" title="免责声明"></a>免责声明</h2><ol>
+<li>本项目为实验性质，按”现状”（as is）提供，不对模型输出的正确性、安全性或适用于特定用途作任何明示或暗示的保证。120M 的模型会出错，也会编造内容，请不要直接用于生产环境。</li>
+<li>训练和 SFT 所用的数据集（包括但不限于 CCI3-HQ 及各类开源 SFT 数据）各有其许可协议，使用者须自行确认并遵守。</li>
+<li>文中的耗时和费用均为估算，实际取决于硬件、软件环境和租用价格。租用 GPU 产生的费用由使用者自行承担。</li>
+<li>在法律允许的最大范围内，项目作者及贡献者不对因使用或无法使用本项目而产生的任何直接或间接损失承担责任。</li>
+</ol>
+<p>鸣谢：PyTorch、FlashAttention、NVIDIA Transformer Engine、CCI3-HQ 数据集、MiniMind 项目</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://resonantalive.github.io/2026/10/01/%E5%BE%AA%E5%B1%82%E3%80%81%E5%87%8F%E4%BD%8D%E3%80%81%E6%B8%90%E6%B7%B1/" data-id="cuidv68gLSywGqC2dgY930I68" data-title="循层、减位、渐深" class="article-share-link"><span class="fa fa-share">分享</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%B0%8F%E6%A8%A1%E5%9E%8B/" rel="tag">小模型</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2026/10/01/Caelum-Ouzel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">前一篇</strong>
+      <div class="article-nav-title">
+        
+          Caelum Ouzel : 分星、积云、循轨
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/project%E5%BC%80%E6%BA%90/" rel="tag">project开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B0%8F%E6%A8%A1%E5%9E%8B/" rel="tag">小模型</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="tag">工作流</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/" rel="tag">模型训练</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/project%E5%BC%80%E6%BA%90/" style="font-size: 20px;">project开源</a> <a href="/tags/%E5%B0%8F%E6%A8%A1%E5%9E%8B/" style="font-size: 10px;">小模型</a> <a href="/tags/%E5%B7%A5%E4%BD%9C%E6%B5%81/" style="font-size: 10px;">工作流</a> <a href="/tags/%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83/" style="font-size: 10px;">模型训练</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/11/">十一月 2026</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2026/10/">十月 2026</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2026/11/14/%E8%AF%86%E8%BF%B9%E3%80%81%E8%A1%A1%E6%96%87%E3%80%81%E7%9F%A5%E5%AD%A6/">识迹、衡文、知学</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/DeepSeek-Harness-Distiller-V1-0/">DeepSeek-Harness-Distiller-V1.0</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/02/test/">test</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/01/Caelum-Ouzel/">Caelum Ouzel : 分星、积云、循轨</a>
+          </li>
+        
+          <li>
+            <a href="/2026/10/01/%E5%BE%AA%E5%B1%82%E3%80%81%E5%87%8F%E4%BD%8D%E3%80%81%E6%B8%90%E6%B7%B1/">循层、减位、渐深</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2026 Jzx<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
